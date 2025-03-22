@@ -1,110 +1,252 @@
 <!DOCTYPE html>
-<html lang="en">
+<html dir='ltr' lang='en' xmlns:fb='http://www.facebook.com/2008/fbml'>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href='https://web.cricfoot.net/favico.png' rel='icon' type='image/x-icon'/>
-<title>YoSinTV Live Channels</title>
+<title>CaveLive - Live Streaming</title>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='width=device-width,minimum-scale=1,initial-scale=1' name='viewport'/>
+<link href='./' rel='canonical'/>
+<link href='./favicon-32x32.png' rel='icon' type='image/x-icon'/>
+<meta content='cavelive, cavelive live, cavelive football live, cavelive cricket live, cavelive live football, cavelive ipl, cavelive epl, cavelive football live today, cavelive live stream, cavelive cricket live stream, cavelive cricket free live, cave live today, cavelive 2.0' name='keywords'/>
+
+<!-- Add HLS.js -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
 body {
-    height: 100vh;
     margin: 0;
     padding: 0;
-    color: #fff;
-    text-align: center;
-    overflow: hidden;
-    font-family: Tahoma, sans-serif;
-    -webkit-font-smoothing: antialiased;
+    background: #000;
+    font-family: Arial, sans-serif;
 }
-#player {
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    background: #000;
+    margin-bottom: 20px;
+}
+
+.video-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     border: none;
 }
-#text {
-    position: fixed;
-    bottom: 50px;
-    width: 100%;
-    font-size: 20px;
+
+.server-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.server-button {
+    padding: 10px 20px;
+    background: #1a1a1a;
     color: #fff;
-    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
-    z-index: 9999;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.server-button:hover {
+    background: #333;
+}
+
+.server-button.active {
+    background: #007bff;
+}
+
+.match-info {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 5px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.match-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.match-details {
+    font-size: 16px;
+    color: #ccc;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .match-title {
+        font-size: 20px;
+    }
+    
+    .match-details {
+        font-size: 14px;
+    }
 }
 </style>
-    
-</head>
-<body>
-<iframe id="player" loading="lazy" allowfullscreen></iframe>
-    
+
 <script>
-const channels = {
+let hls = null;
 
-ipl: " https://www.yosintv.net/1m.html?url=https://director.taihotel.asia/v3/director/VE1NGQ4YjM2NTNkMzJkLTU1Y2EtYmE2NC1kZjJkLWNlYzkyODZh/master.m3u8 ",    // IPL T20
-ipl2: " https://yosintv2.github.io/bkp/plyrr.html?url=https://customer-0agod1prlrzpzm4j.cloudflarestream.com/cf8ee648905593faeecbec29b1ffd2f8/manifest/video.m3u8  ",    // IPL T20
-sky3: " https://wikisport.cc/player/xgPlayer.html?url=https://jf5.dunyapurkaraja.com:999/hls/sky3nz.m3u8?md5=XGOAA0kJBlQFPM-081bCSQ&expires=1742629018 ",   // IPL T20
-sky3ii: " https://www.yosintv.net/1m.html?url=https://director.taihotel.asia/v4/variant/VE1gTdz0mLzRnLv52bt9SMhFjdtM3ajFmc09CNkhjYzYTNzQ2MyQWL1UzYh1iYhZDNtQmZyQWLjV2Y5IDO2E2L.m3u8 ",    // IPL T20
-tsports: " https://yosintv2.github.io/bkp/plyrr.html?url=https://cdn.hoichoi24.com/hoichoi24.com-T-sports/video.m3u8  ",    // IPL T20
-hindi: "https://yosintv2.github.io/bkp/plyrr.html?url=https://v18tataplaysyndication.akamaized.net/bpk-tv/Sports18_1_HD_voot_MOB/output03/index.m3u8?hdnea=exp=1742658254~acl=/*~hmac=bccdfe0fae9d1d43e50da28c6c3f9b67fbc128578a52b9e084fe550519a34aa8  ",    // IPL T20
-
-
-
-
-
-
-
+function setURL(url) {
+    const video = document.getElementById('video-player');
     
-mutv: " https://yosintv2.github.io/bkp/plyrr.html?url=https://bcovlive-a.akamaihd.net/r2d2c4ca5bf57456fb1d16255c1a535c8/eu-west-1/eu-west-1/6058004203001/profile_2/chunklist.m3u8 ",   
-sports5: "https://www.yosintv.net/player3.html?url=https://rgelive.akamaized.net/hls/live/2043151/radiolive/playlist.m3u8",      
-laliga1: " https://wikisport.cc/player/xgPlayer.html?url=https://jf1.naqsheala.com:999/hls/hdchnl2.m3u8?md5=hLn5jsGOgsThn4CULJDktA&expires=1742201210 ",      
-
-
+    // Destroy existing HLS instance if any
+    if (hls) {
+        hls.destroy();
+    }
     
-argentina: " https://www.yosintv.net/dmca.html?url=https://hls.uouetrq19.com/live/sd-6Mr9gDFQdfgWVxrVXm.m3u8?txSecret=6eee6f066c84a23dea476882d742fa7c&txTime=67DF47FD ",   
-france1: " https://www.yosintv.net/1m.html?url=https://director.taihotel.asia/v3/director/VE1MTU0ODNmZGFkZjY1LTE5ZGItNjZiNC03NDljLTgzNmExZGJi/master.m3u8",   
-spain1: " https://www.yosintv.net/1m.html?url=https://director.taihotel.asia/v3/director/VE1ZTcyYTM1MmUyYWU4LWUxOWItYzYwNC1lY2MzLWNjODI5MGE2/master.m3u8",  
-
-
+    // Show loading state
+    video.style.opacity = '0.5';
     
-ucl2: " https://www.yosintv.net/1m.html?url=https://director.taihotel.asia/v4/variant/VE1gTdz0mLzRnLv52bt9SMhFjdtM3ajFmc09yYyEjNkRmM2IjZjhTL0QmM40iZhRGNtI2N5QWLkNDNhVmZ5UzL.m3u8 ",   
-skyme: " https://wikisport.cc/player/xgPlayer.html?url=https://jf7.dunyapurkaraja.com:999/hls/mevent1.m3u8?md5=E0Qu2l4DpHTr1ctfKEO8Kg&expires=1741725203 ",   
-
-portugal: " https://www.yosintv.net/1m.html?url=https://director.taihotel.asia/v3/director/VE1ZjMwMDcxMjYzYTUxLTdiN2EtZDg5NC00OGM4LTc1NjI0MTg2/master.m3u8 ",   
-france: " https://www.yosintv.net/1m.html?url=https://director.taihotel.asia/v3/director/VE1MTU0ODNmZGFkZjY1LTE5ZGItNjZiNC03NDljLTgzNmExZGJi/master.m3u8",   
-spain: " https://www.yosintv.net/1m.html?url=https://director.taihotel.asia/v3/director/VE1ZTcyYTM1MmUyYWU4LWUxOWItYzYwNC1lY2MzLWNjODI5MGE2/master.m3u8",  
-
-tnt1: " https://wikisport.cc/player/xgPlayer.html?url=https://ns1.wikisport.cc/live/d7dbbb00.m3u8?token=uBubv4e7k5MAL1AYBoflIBEnUYU3vRks244Hybrl1ACV3sPoRtrYyKreKmK4JlB3lD7Q ",      
-tnt2: " https://wikisport.cc/player/xgPlayer.html?url=https://ns1.wikisport.cc/live/d7dbbb00.m3u8?token=uBubv4e7k5MAL1AYBoflIBEnUYU3vRks244Hybrl1ACc692c2PtO97kmR2zHywIkInW ",      
-tnt3: " https://wikisport.cc/player/xgplayer?key=G6RH_CEf6nT0VhWbELS7IFJX6XdzOhUNxSoLS0oJTeF_x7bzwOWqFFZGww8VlL2UnyShPxVXyhvCQPkP5rq4y9Qyoxo2UlyS6fJRTCaP7xOQg5Z1HKfyJ4rWAD1JEqUDVvgbYKLK0aWvGeudBA2pXk3cShM50DXK7b2b8zU1g_A= ",   
+    // Create new HLS instance with additional options for better compatibility
+    if (Hls.isSupported()) {
+        hls = new Hls({
+            debug: true,
+            enableWorker: true,
+            lowLatencyMode: true,
+            xhrSetup: function(xhr, url) {
+                // Add any required headers here
+                xhr.withCredentials = false;
+                xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+                xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+            }
+        });
+        
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            console.log('Stream loaded successfully');
+            video.style.opacity = '1';
+            video.play().catch(function(error) {
+                console.log("Play failed:", error);
+                video.play();
+            });
+        });
+        
+        hls.on(Hls.Events.ERROR, function(event, data) {
+            console.error('HLS Error:', data);
+            if (data.fatal) {
+                switch (data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        console.log('Network error, trying to recover...');
+                        hls.startLoad();
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        console.log('Media error, trying to recover...');
+                        hls.recoverMediaError();
+                        break;
+                    default:
+                        console.log('Fatal error, destroying HLS instance');
+                        hls.destroy();
+                        break;
+                }
+            }
+        });
+    }
+    // For browsers that natively support HLS
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.addEventListener('loadedmetadata', function() {
+            video.play().catch(function(error) {
+                console.log("Play failed:", error);
+                video.play();
+            });
+        });
+    }
     
-final: "https://yosintv2.github.io/bkp/plyrr.html?url=https://customer-7mzwznbptbg8bj9x.cloudflarestream.com/7f6d54a5c214e8b101164d5ec0430cc8/manifest/video.m3u8",      
+    // Update active button
+    updateServerButtons();
+    currentUrl = url;
+}
 
+function updateServerButtons() {
+    const buttons = document.querySelectorAll('.server-button');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+        if (button.getAttribute('data-url') === currentUrl) {
+            button.classList.add('active');
+        }
+    });
+}
 
-    
-starhindi: "https://yosintv.github.io/yosintv/jwplayers.html?src=https://mafiatv.live/watch.php?stream=STARSPORTS1 ",      
-s10: "https://www.yosintv.net/player1.html?url=https://customer-mjkjmlbjgn5ywfcu.cloudflarestream.com/742f41ecc4b27f4a4afad4b72bc85d0e/manifest/video.m3u8 ",      
-sky1: " https://wikisport.cc/player/xgPlayer.html?url=https://jf7.dunyapurkaraja.com:999/hls/sky1nz.m3u8?md5=X50XT_o_j-2NcgxxbEcGPA&expires=1741518843 ",      
-sky4: " https://wikisport.cc/player/xgPlayer.html?url=https://ns1.wikisport.cc/live/49a6f2bd.m3u8?token=CovsPoRtEkOxO32yvK6InxFXjrjkz8dXCBCg9IB3HbfTqkxwIkIg92TPdpOHeZpyJr9RVB0	 ",      
-v18: "https://yosintv2.github.io/bkp/plyrr.html?url=https://v18tataplaysyndication.akamaized.net/bpk-tv/Sports18_1_HD_voot_MOB/output03/hdntl=exp=1741591702~acl=%2f*~data=hdntl~hmac=4a62fdb483f3d28a3f341ce4fdc75831597ba3cd81b5b0deff094fb4734727a9/Sports18_1_HD_voot_MOB-audio_108038_eng=108000-video=3728000.m3u8"
-    
+// Define stream URLs based on match ID
+const streamUrls = {
+    'ipl': 'https://director.taihotel.asia/v3/director/VE1NGQ4YjM2NTNkMzJkLTU1Y2EtYmE2NC1kZjJkLWNlYzkyODZh/master.m3u8',
+    'ipl2': 'https://customer-0agod1prlrzpzm4j.cloudflarestream.com/cf8ee648905593faeecbec29b1ffd2f8/manifest/video.m3u8',
+    'sky3': 'https://director.taihotel.asia/v3/director/VE1NGQ4YjM2NTNkMzJkLTU1Y2EtYmE2NC1kZjJkLWNlYzkyODZh/master.m3u8',
+    'tsports': 'https://customer-0agod1prlrzpzm4j.cloudflarestream.com/cf8ee648905593faeecbec29b1ffd2f8/manifest/video.m3u8',
+    'hindi': 'https://director.taihotel.asia/v3/director/VE1NGQ4YjM2NTNkMzJkLTU1Y2EtYmE2NC1kZjJkLWNlYzkyODZh/master.m3u8',
+    'willowm': 'https://customer-0agod1prlrzpzm4j.cloudflarestream.com/cf8ee648905593faeecbec29b1ffd2f8/manifest/video.m3u8',
+    'espn': 'https://director.taihotel.asia/v3/director/VE1NGQ4YjM2NTNkMzJkLTU1Y2EtYmE2NC1kZjJkLWNlYzkyODZh/master.m3u8',
+    'prime': 'https://customer-0agod1prlrzpzm4j.cloudflarestream.com/cf8ee648905593faeecbec29b1ffd2f8/manifest/video.m3u8'
 };
 
-
-
-    
+// Get match ID from URL
 const urlParams = new URLSearchParams(window.location.search);
-const channel = urlParams.get('id');
-function setChannel(channel) {
-const iframe = document.getElementById('player');
-iframe.src = channels[channel] || channels.tnt1;
-}
-setChannel(channel);
+const matchId = urlParams.get('id');
+
+// Set initial stream URL
+const initialUrl = streamUrls[matchId] || streamUrls['ipl'];
+let currentUrl = initialUrl;
 </script>
 
+</head>
+<body>
+<div class="container">
+    <div class="match-info">
+        <div class="match-title">Live Match Streaming</div>
+        <div class="match-details">Watch live cricket and football matches on CaveLive</div>
+    </div>
 
-<div style="position:fixed;top:0;left:0;width:100%;height:1px;overflow:hidden;visibility:hidden;z-index:9999;"><script type="text/javascript" src="//widget.supercounters.com/ssl/online_i.js"></script>
-<script type="text/javascript">sc_online_i(1707252,"ffffff","ffffff");</script><noscript><a href="https://www.supercounters.com/" style="visibility:hidden;">free online counter</a></noscript></div>
+    <div class="video-container">
+        <video id="video-player" controls></video>
+    </div>
 
+    <div class="server-list">
+        <button class="server-button" data-url="ipl" onclick="setURL(streamUrls['ipl'])">Server 1</button>
+        <button class="server-button" data-url="ipl2" onclick="setURL(streamUrls['ipl2'])">Server 2</button>
+        <button class="server-button" data-url="sky3" onclick="setURL(streamUrls['sky3'])">Server 3</button>
+        <button class="server-button" data-url="tsports" onclick="setURL(streamUrls['tsports'])">Server 4</button>
+        <button class="server-button" data-url="hindi" onclick="setURL(streamUrls['hindi'])">Server 5</button>
+        <button class="server-button" data-url="willowm" onclick="setURL(streamUrls['willowm'])">Server 6</button>
+        <button class="server-button" data-url="espn" onclick="setURL(streamUrls['espn'])">Server 7</button>
+        <button class="server-button" data-url="prime" onclick="setURL(streamUrls['prime'])">Server 8</button>
+    </div>
 
-    
+    <div class="match-info">
+        <p>CaveLive doesn't host any media content on its own site. Our site visitors might use external or third-party services to show content (Example: Embedding media from sites like Bet365, Dailymotion, Streamable etc.). We notify all copyright owners that the links and media shared by visitors and contained within this site are hosted somewhere else on the web or embedded from other various sites.</p>
+    </div>
+</div>
+
+<script>
+// Set initial stream URL with error handling
+window.onload = function() {
+    try {
+        setURL(initialUrl);
+    } catch (error) {
+        console.error('Error initializing stream:', error);
+        // Fallback to default stream
+        setURL(streamUrls['ipl']);
+    }
+};
+</script>
+
 </body>
 </html>

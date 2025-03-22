@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html dir='ltr' lang='en' xmlns:fb='http://www.facebook.com/2008/fbml'>
+<head>
+<title>CaveLive - Football Live Streaming</title>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+<meta content='width=device-width,minimum-scale=1,initial-scale=1' name='viewport'/>
+<link href='https://www.cavelive.net/' rel='canonical'/>
+<link href='https://cavelive.github.io/cavelive/football/favicon-32x32.png' rel='icon' type='image/x-icon'/>
+<meta content='cavelive, cavelive live, cavelive football live, cavelive live football, cavelive epl, cavelive football live today, cavelive live stream, cavelive football free live, cave live today, cavelive 2.0' name='keywords'/>
+
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    background: #000;
+    margin-bottom: 20px;
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.server-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.server-button {
+    padding: 10px 20px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.server-button:hover {
+    background: #333;
+}
+
+.server-button.active {
+    background: #007bff;
+}
+
+.match-info {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 5px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.match-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.match-details {
+    font-size: 16px;
+    color: #ccc;
+}
+
+.match-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.match-card {
+    background: #1a1a1a;
+    border-radius: 5px;
+    padding: 15px;
+    color: #fff;
+}
+
+.match-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.match-card p {
+    margin: 5px 0;
+    color: #ccc;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .match-title {
+        font-size: 20px;
+    }
+    
+    .match-details {
+        font-size: 14px;
+    }
+    
+    .match-list {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function setURL(url) {
+    document.getElementById('stream-frame').src = url;
+}
+
+function updateServerButtons() {
+    const buttons = document.querySelectorAll('.server-button');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+        if (button.getAttribute('data-url') === document.getElementById('stream-frame').src) {
+            button.classList.add('active');
+        }
+    });
+}
+
+// Get match ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+const matchId = urlParams.get('id');
+
+// Define stream URLs based on match ID
+const streamUrls = {
+    'epl': 'https://epl.sky.com/sky-sports-premier-league.m3u8',
+    'ucl': 'https://ucl.sky.com/sky-sports-champions-league.m3u8',
+    'laliga': 'https://laliga.sky.com/sky-sports-la-liga.m3u8',
+    'bundesliga': 'https://bundesliga.sky.com/sky-sports-bundesliga.m3u8',
+    'seriea': 'https://seriea.sky.com/sky-sports-serie-a.m3u8',
+    'ligue1': 'https://ligue1.sky.com/sky-sports-ligue-1.m3u8',
+    'euro': 'https://euro.sky.com/sky-sports-euro-2024.m3u8',
+    'copa': 'https://copa.sky.com/sky-sports-copa-america.m3u8'
+};
+
+// Set initial stream URL
+const initialUrl = streamUrls[matchId] || streamUrls['epl'];
+</script>
+
+</head>
+<body>
+<div class="container">
+    <div class="match-info">
+        <div class="match-title">Football Live Streaming</div>
+        <div class="match-details">Watch live football matches on CaveLive</div>
+    </div>
+
+    <div class="video-container">
+        <iframe id="stream-frame" src="" allowfullscreen></iframe>
+    </div>
+
+    <div class="server-list">
+        <button class="server-button" onclick="setURL(streamUrls['epl'])">EPL</button>
+        <button class="server-button" onclick="setURL(streamUrls['ucl'])">Champions League</button>
+        <button class="server-button" onclick="setURL(streamUrls['laliga'])">La Liga</button>
+        <button class="server-button" onclick="setURL(streamUrls['bundesliga'])">Bundesliga</button>
+        <button class="server-button" onclick="setURL(streamUrls['seriea'])">Serie A</button>
+        <button class="server-button" onclick="setURL(streamUrls['ligue1'])">Ligue 1</button>
+        <button class="server-button" onclick="setURL(streamUrls['euro'])">Euro 2024</button>
+        <button class="server-button" onclick="setURL(streamUrls['copa'])">Copa America</button>
+    </div>
+
+    <div class="match-list">
+        <div class="match-card">
+            <h3>Premier League</h3>
+            <p>Watch all Premier League matches live</p>
+            <button class="server-button" onclick="setURL(streamUrls['epl'])">Watch Now</button>
+        </div>
+        <div class="match-card">
+            <h3>Champions League</h3>
+            <p>Live UEFA Champions League matches</p>
+            <button class="server-button" onclick="setURL(streamUrls['ucl'])">Watch Now</button>
+        </div>
+        <div class="match-card">
+            <h3>Euro 2024</h3>
+            <p>Live UEFA Euro 2024 matches</p>
+            <button class="server-button" onclick="setURL(streamUrls['euro'])">Watch Now</button>
+        </div>
+        <div class="match-card">
+            <h3>Copa America</h3>
+            <p>Live Copa America 2024 matches</p>
+            <button class="server-button" onclick="setURL(streamUrls['copa'])">Watch Now</button>
+        </div>
+    </div>
+
+    <div class="match-info">
+        <p>CaveLive doesn't host any media content on its own site. Our site visitors might use external or third-party services to show content (Example: Embedding media from sites like Bet365, Dailymotion, Streamable etc.). We notify all copyright owners that the links and media shared by visitors and contained within this site are hosted somewhere else on the web or embedded from other various sites.</p>
+    </div>
+</div>
+
+<script>
+// Set initial stream URL when page loads
+window.onload = function() {
+    setURL(initialUrl);
+    updateServerButtons();
+};
+</script>
+
+</body>
+</html> 
